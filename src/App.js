@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -27,6 +27,7 @@ function App() {
           releaseDate: movieData.release_date,
         };
       });
+
       setMovies(transformedMovies);
     } catch (error) {
       setError(error.message);
@@ -38,19 +39,21 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  let content = <p>Found no movies.</p>;
+  const content = useMemo(() => {
+    if (isLoading) {
+      return <p>Loading...</p>;
+    }
 
-  if (movies.length > 0) {
-    content = <MoviesList movies={movies} />;
-  }
+    if (error) {
+      return <p>{error}</p>;
+    }
 
-  if (error) {
-    content = <p>{error}</p>;
-  }
+    if (movies.length === 0) {
+      return <p>Found no movies.</p>;
+    }
 
-  if (isLoading) {
-    content = <p>Loading...</p>;
-  }
+    return <MoviesList movies={movies} />;
+  }, [isLoading, error, movies]);
 
   return (
     <React.Fragment>
